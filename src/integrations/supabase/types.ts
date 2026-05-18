@@ -146,6 +146,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_organisation_with_owner: {
+        Args: { _name: string; _slug: string }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          settings: Json
+          slug: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organisations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_any_org_role: {
         Args: {
           _org_id: string
