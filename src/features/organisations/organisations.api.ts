@@ -34,29 +34,22 @@ function slugify(input: string) {
 }
 
 export async function createOrganisation(name: string): Promise<Organisation> {
-  const { data: userData, error: userErr } = await supabase.auth.getUser();
-  if (userErr || !userData.user) throw userErr ?? new Error("Not authenticated");
-
   // slug unique : on suffixe avec un timestamp court si conflit
-  const orgId = crypto.randomUUID();
   const baseSlug = slugify(name);
   const slug = `${baseSlug}-${Date.now().toString(36).slice(-4)}`;
 
-  // On évite `.select()` ici : avant l'insertion du membership, la règle RLS
-  // de lecture de l'organisation ne peut pas encore autoriser le retour de ligne.
-  const { error } = await supabase
-    .from("organisations")
-    .insert({ id: orgId, name, slug });
-  if (error) throw error;
-
-  // Le créateur devient org_admin
-  const { error: mErr } = await supabase.from("memberships").insert({
-    user_id: userData.user.id,
-    organisation_id: orgId,
-    role: "org_admin",
+  const rpcClient = supabase as unknown as {
+    rpc: (
+      fn: "create_organisation_with_owner",
+      args: { _name: string; _slug: string },
+    ) => Promise<{ data: Organisation | null; error: Error | null }>;
+  };
+  const { data: org, error } = await rpcClient.rpc("create_organisation_with_owner", {
+    _name: name,
+    _slug: slug,
   });
-  if (mErr) throw mErr;
+  if (error) throw error;
+  if (!org) throw new Error("Organisation non créée");
 
-  const now = new Date().toISOString();
-  return { id: orgId, name, slug, settings: {}, created_at: now, updated_at: now };
+  return org;
 }
