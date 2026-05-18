@@ -38,23 +38,25 @@ export async function createOrganisation(name: string): Promise<Organisation> {
   if (userErr || !userData.user) throw userErr ?? new Error("Not authenticated");
 
   // slug unique : on suffixe avec un timestamp court si conflit
+  const orgId = crypto.randomUUID();
   const baseSlug = slugify(name);
   const slug = `${baseSlug}-${Date.now().toString(36).slice(-4)}`;
 
-  const { data: org, error } = await supabase
+  // On évite `.select()` ici : avant l'insertion du membership, la règle RLS
+  // de lecture de l'organisation ne peut pas encore autoriser le retour de ligne.
+  const { error } = await supabase
     .from("organisations")
-    .insert({ name, slug })
-    .select()
-    .single();
+    .insert({ id: orgId, name, slug });
   if (error) throw error;
 
   // Le créateur devient org_admin
   const { error: mErr } = await supabase.from("memberships").insert({
     user_id: userData.user.id,
-    organisation_id: org.id,
+    organisation_id: orgId,
     role: "org_admin",
   });
   if (mErr) throw mErr;
 
-  return org;
+  const now = new Date().toISOString();
+  return { id: orgId, name, slug, settings: {}, created_at: now, updated_at: now };
 }
