@@ -62,15 +62,8 @@ function PlanningPage() {
                 </span>
                 <Link
                   to="/app/events/$eventId/$activityId"
-                  params={{ eventId: "", activityId: s.activity_id }}
-                  search={{}}
+                  params={{ eventId: s.event_id, activityId: s.activity_id }}
                   className="text-xs text-primary inline-flex items-center hover:underline"
-                  // event id requis par le router ; on n'a pas le mapping ici, on renvoie vers activité directement
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // Fallback : navigation via location pour éviter d'avoir à charger l'event_id
-                    window.location.assign(`/app/events/_/${s.activity_id}`);
-                  }}
                 >
                   Affecter <ArrowRight className="h-3 w-3 ml-1" />
                 </Link>
