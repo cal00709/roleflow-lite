@@ -1,5 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { LogOut, Users, LayoutDashboard } from "lucide-react";
+import { LogOut, Users, LayoutDashboard, CalendarDays, Tags, ClipboardList } from "lucide-react";
 import { useAuth } from "@/features/auth/auth-context";
 import { useOrganisation } from "@/features/organisations/organisation-context";
 import { OrgSwitcher } from "./org-switcher";
@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 
 const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/app/events", label: "Évènements", icon: CalendarDays, exact: false },
+  { to: "/app/planning", label: "Planning", icon: ClipboardList, exact: false },
   { to: "/app/workers", label: "Travailleurs", icon: Users, exact: false },
+  { to: "/app/roles", label: "Rôles", icon: Tags, exact: false },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -81,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Bottom nav mobile */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 border-t bg-background grid grid-cols-2">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 border-t bg-background grid grid-cols-5">
         {NAV.map(({ to, label, icon: Icon, exact }) => (
           <Link
             key={to}

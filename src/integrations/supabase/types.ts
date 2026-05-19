@@ -14,6 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          location: string | null
+          name: string
+          organisation_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          location?: string | null
+          name: string
+          organisation_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          location?: string | null
+          name?: string
+          organisation_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          created_at: string
+          id: string
+          organisation_id: string
+          shift_id: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organisation_id: string
+          shift_id: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organisation_id?: string
+          shift_id?: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          location: string | null
+          name: string
+          organisation_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          location?: string | null
+          name: string
+          organisation_id: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          location?: string | null
+          name?: string
+          organisation_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           created_at: string
@@ -96,6 +240,99 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organisation_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organisation_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organisation_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          activity_id: string
+          capacity: number
+          created_at: string
+          end_at: string
+          id: string
+          organisation_id: string
+          role_id: string
+          start_at: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          capacity?: number
+          created_at?: string
+          end_at: string
+          id?: string
+          organisation_id: string
+          role_id: string
+          start_at: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          capacity?: number
+          created_at?: string
+          end_at?: string
+          id?: string
+          organisation_id?: string
+          role_id?: string
+          start_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workers: {
         Row: {
@@ -191,6 +428,7 @@ export type Database = {
         | "organiser"
         | "activity_manager"
         | "worker"
+      assignment_status: "pending" | "confirmed" | "cancelled" | "checked_in"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -325,6 +563,7 @@ export const Constants = {
         "activity_manager",
         "worker",
       ],
+      assignment_status: ["pending", "confirmed", "cancelled", "checked_in"],
     },
   },
 } as const
