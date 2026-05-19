@@ -38,12 +38,12 @@ export async function listShiftsByActivity(activityId: string): Promise<ShiftWit
 
 /** Shifts non remplis (capacity > assignments) sur toute l'organisation. */
 export async function listOpenShifts(organisationId: string): Promise<
-  (ShiftWithRole & { activity_name: string; event_name: string })[]
+  (ShiftWithRole & { activity_name: string; event_name: string; event_id: string })[]
 > {
   const { data, error } = await supabase
     .from("shifts")
     .select(
-      "*, role:roles(id, name), assignments(id), activity:activities(name, event:events(name))",
+      "*, role:roles(id, name), assignments(id), activity:activities(name, event_id, event:events(id, name))",
     )
     .eq("organisation_id", organisationId)
     .order("start_at", { ascending: true });
@@ -53,13 +53,14 @@ export async function listOpenShifts(organisationId: string): Promise<
       const row = s as Shift & {
         role: Pick<Role, "id" | "name"> | null;
         assignments: { id: string }[];
-        activity: { name: string; event: { name: string } | null } | null;
+        activity: { name: string; event_id: string; event: { id: string; name: string } | null } | null;
       };
       return {
         ...row,
         assignments_count: row.assignments?.length ?? 0,
         activity_name: row.activity?.name ?? "—",
         event_name: row.activity?.event?.name ?? "—",
+        event_id: row.activity?.event_id ?? "",
       };
     })
     .filter((s) => s.assignments_count < s.capacity);
