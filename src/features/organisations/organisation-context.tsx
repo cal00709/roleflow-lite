@@ -23,14 +23,17 @@ const OrgContext = createContext<OrgContextValue | undefined>(undefined);
 
 export function OrganisationProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const userId = user?.id ?? null;
   const [memberships, setMemberships] = useState<MembershipWithOrg[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeOrgId, setActiveOrgId] = useState<string | null>(
     typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null,
   );
 
+  // Dépend de l'ID stable, pas de l'objet user (qui peut changer de référence
+  // à chaque évènement Supabase et déclencher une boucle de fetch).
   const refresh = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setMemberships([]);
       setLoading(false);
       return;
@@ -42,7 +45,7 @@ export function OrganisationProvider({ children }: { children: React.ReactNode }
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     refresh();
@@ -70,7 +73,7 @@ export function OrganisationProvider({ children }: { children: React.ReactNode }
     [memberships, activeOrgId],
   );
 
-  const value: OrgContextValue = {
+  const value = useMemo<OrgContextValue>(() => ({
     loading,
     memberships,
     activeOrgId,
@@ -78,7 +81,7 @@ export function OrganisationProvider({ children }: { children: React.ReactNode }
     role: activeMembership?.role ?? null,
     selectOrg,
     refresh,
-  };
+  }), [loading, memberships, activeOrgId, activeMembership, selectOrg, refresh]);
 
   return <OrgContext.Provider value={value}>{children}</OrgContext.Provider>;
 }

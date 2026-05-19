@@ -3,6 +3,11 @@
  *
  * Pattern recommandé : on installe `onAuthStateChange` AVANT `getSession`
  * pour ne pas rater un évènement d'initialisation.
+ *
+ * Important : on évite les re-renders inutiles en ne posant la nouvelle
+ * session que si l'access_token a réellement changé. Sans ça, chaque
+ * évènement Supabase (INITIAL_SESSION, focus tab, TOKEN_REFRESHED…) crée
+ * un nouvel objet en state et fait boucler les consommateurs.
  */
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
@@ -17,18 +22,28 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function sameSession(a: Session | null, b: Session | null) {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.access_token === b.access_token && a.user?.id === b.user?.id;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSessionState] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const setSessionIfChanged = (next: Session | null) => {
+      setSessionState((prev) => (sameSession(prev, next) ? prev : next));
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
+      setSessionIfChanged(s);
       setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+      setSessionIfChanged(data.session);
       setLoading(false);
     });
 
