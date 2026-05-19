@@ -84,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Bottom nav mobile */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 border-t bg-background grid grid-cols-2">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 border-t bg-background grid grid-cols-5">
         {NAV.map(({ to, label, icon: Icon, exact }) => (
           <Link
             key={to}
