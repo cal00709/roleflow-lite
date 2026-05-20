@@ -9,7 +9,7 @@
  * évènement Supabase (INITIAL_SESSION, focus tab, TOKEN_REFRESHED…) crée
  * un nouvel objet en state et fait boucler les consommateurs.
  */
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -31,20 +31,28 @@ function sameSession(a: Session | null, b: Session | null) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSessionState] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
+    const finishInitialLoad = () => {
+      if (!initialLoadDone.current) {
+        initialLoadDone.current = true;
+        setLoading(false);
+      }
+    };
+
     const setSessionIfChanged = (next: Session | null) => {
       setSessionState((prev) => (sameSession(prev, next) ? prev : next));
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSessionIfChanged(s);
-      setLoading(false);
+      finishInitialLoad();
     });
 
     supabase.auth.getSession().then(({ data }) => {
       setSessionIfChanged(data.session);
-      setLoading(false);
+      finishInitialLoad();
     });
 
     return () => subscription.unsubscribe();

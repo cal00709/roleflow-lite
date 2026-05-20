@@ -3,7 +3,7 @@
  * Persiste l'ID sélectionné en localStorage, expose la liste des memberships,
  * et fournit le rôle de l'utilisateur courant dans l'orga active.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 import { listMyMemberships, type AppRole, type MembershipWithOrg } from "./organisations.api";
 
@@ -22,46 +22,65 @@ interface OrgContextValue {
 const OrgContext = createContext<OrgContextValue | undefined>(undefined);
 
 export function OrganisationProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const userId = user?.id ?? null;
   const [memberships, setMemberships] = useState<MembershipWithOrg[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeOrgId, setActiveOrgId] = useState<string | null>(
     typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null,
   );
+  const refreshInFlight = useRef<Promise<void> | null>(null);
 
-  // Dépend de l'ID stable, pas de l'objet user (qui peut changer de référence
-  // à chaque évènement Supabase et déclencher une boucle de fetch).
   const refresh = useCallback(async () => {
+    if (authLoading) return;
+
     if (!userId) {
       setMemberships([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
-    try {
-      const rows = await listMyMemberships();
-      setMemberships(rows);
-    } finally {
-      setLoading(false);
+
+    if (refreshInFlight.current) {
+      return refreshInFlight.current;
     }
-  }, [userId]);
+
+    const run = (async () => {
+      setLoading(true);
+      try {
+        const rows = await listMyMemberships();
+        setMemberships(rows);
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    refreshInFlight.current = run;
+    try {
+      await run;
+    } finally {
+      if (refreshInFlight.current === run) {
+        refreshInFlight.current = null;
+      }
+    }
+  }, [userId, authLoading]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (authLoading) return;
+    void refresh();
+  }, [authLoading, refresh]);
 
   // Auto-sélection : conserve la valeur stockée si valide, sinon prend la première.
   useEffect(() => {
     if (loading || memberships.length === 0) return;
-    const stored = activeOrgId;
-    const valid = stored && memberships.some((m) => m.organisation_id === stored);
-    if (!valid) {
+
+    setActiveOrgId((stored) => {
+      const valid = stored && memberships.some((m) => m.organisation_id === stored);
+      if (valid) return stored;
       const fallback = memberships[0].organisation_id;
-      setActiveOrgId(fallback);
       localStorage.setItem(STORAGE_KEY, fallback);
-    }
-  }, [loading, memberships, activeOrgId]);
+      return fallback;
+    });
+  }, [loading, memberships]);
 
   const selectOrg = useCallback((id: string) => {
     setActiveOrgId(id);
@@ -74,14 +93,14 @@ export function OrganisationProvider({ children }: { children: React.ReactNode }
   );
 
   const value = useMemo<OrgContextValue>(() => ({
-    loading,
+    loading: authLoading || loading,
     memberships,
     activeOrgId,
     activeMembership,
     role: activeMembership?.role ?? null,
     selectOrg,
     refresh,
-  }), [loading, memberships, activeOrgId, activeMembership, selectOrg, refresh]);
+  }), [authLoading, loading, memberships, activeOrgId, activeMembership, selectOrg, refresh]);
 
   return <OrgContext.Provider value={value}>{children}</OrgContext.Provider>;
 }
