@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <OrgSwitcher />
         </div>
         <nav className="flex-1 px-3 py-3 space-y-1">
-          {NAV.map(({ to, label, icon: Icon, exact }) => (
+          {NAV.filter((n) => !n.adminOnly || role === "org_admin").map(({ to, label, icon: Icon, exact }) => (
             <Link
               key={to}
               to={to}
