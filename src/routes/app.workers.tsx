@@ -131,14 +131,18 @@ function WorkersPage() {
               key={w.id}
               className="flex items-center justify-between gap-4 rounded-lg border bg-card p-4 shadow-sm"
             >
-              <div className="min-w-0">
+              <Link
+                to="/app/workers/$workerId"
+                params={{ workerId: w.id }}
+                className="min-w-0 flex-1 hover:opacity-80 transition-opacity"
+              >
                 <p className="font-medium truncate">
                   {w.first_name} {w.last_name}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
                   {[w.email, w.phone].filter(Boolean).join(" · ") || "Aucun contact"}
                 </p>
-              </div>
+              </Link>
               {canEdit && (
                 <div className="flex items-center gap-1 shrink-0">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(w)} aria-label="Modifier">
