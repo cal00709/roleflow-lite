@@ -298,7 +298,7 @@ function InviteForm({
           <Label>Rôle</Label>
           <Select
             defaultValue="worker"
-            onValueChange={(v) => form.setValue("role", v as AppRole)}
+            onValueChange={(v) => form.setValue("role", v as InviteDTO["role"])}
           >
             <SelectTrigger>
               <SelectValue />

@@ -18,6 +18,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppWorkersRouteImport } from './routes/app.workers'
 import { Route as AppRolesRouteImport } from './routes/app.roles'
 import { Route as AppPlanningRouteImport } from './routes/app.planning'
+import { Route as AppMembersRouteImport } from './routes/app.members'
 import { Route as AppEventsRouteImport } from './routes/app.events'
 import { Route as AppEventsEventIdRouteImport } from './routes/app.events.$eventId'
 import { Route as AppEventsEventIdActivityIdRouteImport } from './routes/app.events.$eventId.$activityId'
@@ -67,6 +68,11 @@ const AppPlanningRoute = AppPlanningRouteImport.update({
   path: '/planning',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMembersRoute = AppMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEventsRoute = AppEventsRouteImport.update({
   id: '/events',
   path: '/events',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/events': typeof AppEventsRouteWithChildren
+  '/app/members': typeof AppMembersRoute
   '/app/planning': typeof AppPlanningRoute
   '/app/roles': typeof AppRolesRoute
   '/app/workers': typeof AppWorkersRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/events': typeof AppEventsRouteWithChildren
+  '/app/members': typeof AppMembersRoute
   '/app/planning': typeof AppPlanningRoute
   '/app/roles': typeof AppRolesRoute
   '/app/workers': typeof AppWorkersRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/events': typeof AppEventsRouteWithChildren
+  '/app/members': typeof AppMembersRoute
   '/app/planning': typeof AppPlanningRoute
   '/app/roles': typeof AppRolesRoute
   '/app/workers': typeof AppWorkersRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/events'
+    | '/app/members'
     | '/app/planning'
     | '/app/roles'
     | '/app/workers'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/events'
+    | '/app/members'
     | '/app/planning'
     | '/app/roles'
     | '/app/workers'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/events'
+    | '/app/members'
     | '/app/planning'
     | '/app/roles'
     | '/app/workers'
@@ -243,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlanningRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/members': {
+      id: '/app/members'
+      path: '/members'
+      fullPath: '/app/members'
+      preLoaderRoute: typeof AppMembersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/events': {
       id: '/app/events'
       path: '/events'
@@ -292,6 +311,7 @@ const AppEventsRouteWithChildren = AppEventsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppEventsRoute: typeof AppEventsRouteWithChildren
+  AppMembersRoute: typeof AppMembersRoute
   AppPlanningRoute: typeof AppPlanningRoute
   AppRolesRoute: typeof AppRolesRoute
   AppWorkersRoute: typeof AppWorkersRoute
@@ -300,6 +320,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppEventsRoute: AppEventsRouteWithChildren,
+  AppMembersRoute: AppMembersRoute,
   AppPlanningRoute: AppPlanningRoute,
   AppRolesRoute: AppRolesRoute,
   AppWorkersRoute: AppWorkersRoute,
