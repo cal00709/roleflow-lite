@@ -1,16 +1,17 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { LogOut, Users, LayoutDashboard, CalendarDays, Tags, ClipboardList } from "lucide-react";
+import { LogOut, Users, LayoutDashboard, CalendarDays, Tags, ClipboardList, UserCog } from "lucide-react";
 import { useAuth } from "@/features/auth/auth-context";
 import { useOrganisation } from "@/features/organisations/organisation-context";
 import { OrgSwitcher } from "./org-switcher";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
-  { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/app/events", label: "Évènements", icon: CalendarDays, exact: false },
-  { to: "/app/planning", label: "Planning", icon: ClipboardList, exact: false },
-  { to: "/app/workers", label: "Travailleurs", icon: Users, exact: false },
-  { to: "/app/roles", label: "Rôles", icon: Tags, exact: false },
+  { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true, adminOnly: false },
+  { to: "/app/events", label: "Évènements", icon: CalendarDays, exact: false, adminOnly: false },
+  { to: "/app/planning", label: "Planning", icon: ClipboardList, exact: false, adminOnly: false },
+  { to: "/app/workers", label: "Travailleurs", icon: Users, exact: false, adminOnly: false },
+  { to: "/app/roles", label: "Rôles", icon: Tags, exact: false, adminOnly: false },
+  { to: "/app/members", label: "Membres", icon: UserCog, exact: false, adminOnly: true },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
