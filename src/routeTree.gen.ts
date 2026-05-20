@@ -18,7 +18,9 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppWorkersRouteImport } from './routes/app.workers'
 import { Route as AppRolesRouteImport } from './routes/app.roles'
 import { Route as AppPlanningRouteImport } from './routes/app.planning'
+import { Route as AppMembersRouteImport } from './routes/app.members'
 import { Route as AppEventsRouteImport } from './routes/app.events'
+import { Route as AppWorkersWorkerIdRouteImport } from './routes/app.workers.$workerId'
 import { Route as AppEventsEventIdRouteImport } from './routes/app.events.$eventId'
 import { Route as AppEventsEventIdActivityIdRouteImport } from './routes/app.events.$eventId.$activityId'
 
@@ -67,10 +69,20 @@ const AppPlanningRoute = AppPlanningRouteImport.update({
   path: '/planning',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMembersRoute = AppMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEventsRoute = AppEventsRouteImport.update({
   id: '/events',
   path: '/events',
   getParentRoute: () => AppRoute,
+} as any)
+const AppWorkersWorkerIdRoute = AppWorkersWorkerIdRouteImport.update({
+  id: '/$workerId',
+  path: '/$workerId',
+  getParentRoute: () => AppWorkersRoute,
 } as any)
 const AppEventsEventIdRoute = AppEventsEventIdRouteImport.update({
   id: '/$eventId',
@@ -91,11 +103,13 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/events': typeof AppEventsRouteWithChildren
+  '/app/members': typeof AppMembersRoute
   '/app/planning': typeof AppPlanningRoute
   '/app/roles': typeof AppRolesRoute
-  '/app/workers': typeof AppWorkersRoute
+  '/app/workers': typeof AppWorkersRouteWithChildren
   '/app/': typeof AppIndexRoute
   '/app/events/$eventId': typeof AppEventsEventIdRouteWithChildren
+  '/app/workers/$workerId': typeof AppWorkersWorkerIdRoute
   '/app/events/$eventId/$activityId': typeof AppEventsEventIdActivityIdRoute
 }
 export interface FileRoutesByTo {
@@ -104,11 +118,13 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/events': typeof AppEventsRouteWithChildren
+  '/app/members': typeof AppMembersRoute
   '/app/planning': typeof AppPlanningRoute
   '/app/roles': typeof AppRolesRoute
-  '/app/workers': typeof AppWorkersRoute
+  '/app/workers': typeof AppWorkersRouteWithChildren
   '/app': typeof AppIndexRoute
   '/app/events/$eventId': typeof AppEventsEventIdRouteWithChildren
+  '/app/workers/$workerId': typeof AppWorkersWorkerIdRoute
   '/app/events/$eventId/$activityId': typeof AppEventsEventIdActivityIdRoute
 }
 export interface FileRoutesById {
@@ -119,11 +135,13 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/events': typeof AppEventsRouteWithChildren
+  '/app/members': typeof AppMembersRoute
   '/app/planning': typeof AppPlanningRoute
   '/app/roles': typeof AppRolesRoute
-  '/app/workers': typeof AppWorkersRoute
+  '/app/workers': typeof AppWorkersRouteWithChildren
   '/app/': typeof AppIndexRoute
   '/app/events/$eventId': typeof AppEventsEventIdRouteWithChildren
+  '/app/workers/$workerId': typeof AppWorkersWorkerIdRoute
   '/app/events/$eventId/$activityId': typeof AppEventsEventIdActivityIdRoute
 }
 export interface FileRouteTypes {
@@ -135,11 +153,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/events'
+    | '/app/members'
     | '/app/planning'
     | '/app/roles'
     | '/app/workers'
     | '/app/'
     | '/app/events/$eventId'
+    | '/app/workers/$workerId'
     | '/app/events/$eventId/$activityId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -148,11 +168,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/events'
+    | '/app/members'
     | '/app/planning'
     | '/app/roles'
     | '/app/workers'
     | '/app'
     | '/app/events/$eventId'
+    | '/app/workers/$workerId'
     | '/app/events/$eventId/$activityId'
   id:
     | '__root__'
@@ -162,11 +184,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/events'
+    | '/app/members'
     | '/app/planning'
     | '/app/roles'
     | '/app/workers'
     | '/app/'
     | '/app/events/$eventId'
+    | '/app/workers/$workerId'
     | '/app/events/$eventId/$activityId'
   fileRoutesById: FileRoutesById
 }
@@ -243,12 +267,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlanningRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/members': {
+      id: '/app/members'
+      path: '/members'
+      fullPath: '/app/members'
+      preLoaderRoute: typeof AppMembersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/events': {
       id: '/app/events'
       path: '/events'
       fullPath: '/app/events'
       preLoaderRoute: typeof AppEventsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app/workers/$workerId': {
+      id: '/app/workers/$workerId'
+      path: '/$workerId'
+      fullPath: '/app/workers/$workerId'
+      preLoaderRoute: typeof AppWorkersWorkerIdRouteImport
+      parentRoute: typeof AppWorkersRoute
     }
     '/app/events/$eventId': {
       id: '/app/events/$eventId'
@@ -290,19 +328,33 @@ const AppEventsRouteWithChildren = AppEventsRoute._addFileChildren(
   AppEventsRouteChildren,
 )
 
+interface AppWorkersRouteChildren {
+  AppWorkersWorkerIdRoute: typeof AppWorkersWorkerIdRoute
+}
+
+const AppWorkersRouteChildren: AppWorkersRouteChildren = {
+  AppWorkersWorkerIdRoute: AppWorkersWorkerIdRoute,
+}
+
+const AppWorkersRouteWithChildren = AppWorkersRoute._addFileChildren(
+  AppWorkersRouteChildren,
+)
+
 interface AppRouteChildren {
   AppEventsRoute: typeof AppEventsRouteWithChildren
+  AppMembersRoute: typeof AppMembersRoute
   AppPlanningRoute: typeof AppPlanningRoute
   AppRolesRoute: typeof AppRolesRoute
-  AppWorkersRoute: typeof AppWorkersRoute
+  AppWorkersRoute: typeof AppWorkersRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppEventsRoute: AppEventsRouteWithChildren,
+  AppMembersRoute: AppMembersRoute,
   AppPlanningRoute: AppPlanningRoute,
   AppRolesRoute: AppRolesRoute,
-  AppWorkersRoute: AppWorkersRoute,
+  AppWorkersRoute: AppWorkersRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 

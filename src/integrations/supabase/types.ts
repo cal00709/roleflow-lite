@@ -158,6 +158,47 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invited_by: string
+          organisation_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invited_by: string
+          organisation_id: string
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string
+          organisation_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memberships: {
         Row: {
           created_at: string
@@ -383,6 +424,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: {
+        Args: { _invitation_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          organisation_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "memberships"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_organisation_with_owner: {
         Args: { _name: string; _slug: string }
         Returns: {
@@ -419,6 +476,32 @@ export type Database = {
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      list_org_members: {
+        Args: { _org_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          membership_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
+      list_worker_assignments: {
+        Args: { _worker_id: string }
+        Returns: {
+          activity_id: string
+          activity_name: string
+          assignment_id: string
+          end_at: string
+          event_id: string
+          event_name: string
+          role_name: string
+          shift_id: string
+          start_at: string
+          status: Database["public"]["Enums"]["assignment_status"]
+        }[]
       }
     }
     Enums: {
